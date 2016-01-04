@@ -244,7 +244,7 @@ declare module JSData {
      * Model will be shallow copied to the child Model. The child Model's
      * prototype will point to the parent Model.
      */
-    static extend<R>(instanceProps?: Object, staticProps?: ModelOptions): ModelConstructor<R>;
+    static extend<R>(instanceProps?: Object, staticProps?: ModelDefinition): ModelConstructor<R>;
   }
 
   interface ModelOptions {
@@ -258,7 +258,6 @@ declare module JSData {
     endpoint?: string;
     idAttribute?: string;
     linkRelations?: boolean;
-    name?: string;
     notify?: boolean;
     onConflict?: string;
     relationsEnumerable?: boolean;
@@ -266,8 +265,12 @@ declare module JSData {
     upsert?: boolean;
   }
 
-  interface ModelConstructor<R> extends ModelOptions {
-    new (properties: R, options: ModelOptions): Model<R>;
+  interface ModelDefinition extends ModelOptions {
+    name: string;
+  }
+
+  interface ModelConstructor<R> extends ModelDefinition {
+    new (properties: R, options?: ModelOptions): Model<R>;
 
     /**
      * Create a new secondary index in the Collection instance of this Model.
@@ -448,7 +451,7 @@ declare module JSData {
      * Model will be shallow copied to the child Model. The child Model's
      * prototype will point to the parent Model.
      */
-    extend<R>(instanceProps?: Object, staticProps?: ModelOptions): ModelConstructor<R>;
+    extend<R>(instanceProps?: Object, staticProps?: ModelDefinition): ModelConstructor<R>;
   }
 
   interface Adapter { }
