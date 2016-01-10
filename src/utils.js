@@ -3,6 +3,10 @@
  * @memberof module:js-data
  */
 
+function toString (x) {
+  return Object.prototype.toString.call(x)
+}
+
 /**
  * Return whether the provided value is an array.
  * @method
@@ -14,7 +18,7 @@ export const isArray = Array.isArray
  * @param {*} [value] - The value to test.
  */
 export function isObject (value) {
-  return toString.call(value) === '[object Object]' || false
+  return toString(value) === '[object Object]' || false
 }
 function isPlainObject (value) {
   return (!!value && typeof value === 'object' && value.constructor === Object)
@@ -24,21 +28,21 @@ function isPlainObject (value) {
  * @param {*} [value] - The value to test.
  */
 export function isRegExp (value) {
-  return toString.call(value) === '[object RegExp]' || false
+  return toString(value) === '[object RegExp]' || false
 }
 /**
  * Return whether the provided value is a string type.
  * @param {*} [value] - The value to test.
  */
 export function isString (value) {
-  return typeof value === 'string' || (value && typeof value === 'object' && toString.call(value) === '[object String]') || false
+  return typeof value === 'string' || (value && typeof value === 'object' && toString(value) === '[object String]') || false
 }
 /**
  * Return whether the provided value is a date type.
  * @param {*} [value] - The value to test.
  */
 export function isDate (value) {
-  return (value && typeof value === 'object' && toString.call(value) === '[object Date]') || false
+  return (value && typeof value === 'object' && toString(value) === '[object Date]') || false
 }
 /**
  * Return whether the provided value is a number type.
@@ -46,21 +50,21 @@ export function isDate (value) {
  */
 export function isNumber (value) {
   const type = typeof value
-  return type === 'number' || (value && type === 'object' && toString.call(value) === '[object Number]') || false
+  return type === 'number' || (value && type === 'object' && toString(value) === '[object Number]') || false
 }
 /**
  * Return whether the provided value is a boolean type.
  * @param {*} [value] - The value to test.
  */
 export function isBoolean (value) {
-  return toString.call(value) === '[object Boolean]'
+  return toString(value) === '[object Boolean]'
 }
 /**
  * Return whether the provided value is a function.
  * @param {*} [value] - The value to test.
  */
 export function isFunction (value) {
-  return typeof value === 'function' || (value && toString.call(value) === '[object Function]') || false
+  return typeof value === 'function' || (value && toString(value) === '[object Function]') || false
 }
 /**
  * Return whether the provided value is a string or a number.
@@ -197,7 +201,7 @@ export function reject (value) {
 export function _ (Model, opts) {
   for (var key in Model) {
     let value = Model[key]
-    if (opts[key] === undefined && !isFunction(value)) {
+    if (opts[key] === undefined && !isFunction(value) && key && key.indexOf('_') !== 0) {
       opts[key] = value
     }
   }
@@ -252,7 +256,7 @@ export function isBlacklisted (prop, bl) {
   }
   let matches
   for (var i = 0; i < bl.length; i++) {
-    if ((Object.prototype.toString.call(bl[i]) === '[object RegExp]' && bl[i].test(prop)) || bl[i] === prop) {
+    if ((toString(bl[i]) === '[object RegExp]' && bl[i].test(prop)) || bl[i] === prop) {
       matches = prop
       return matches
     }
@@ -389,7 +393,7 @@ export function camelCase (str) {
  * @param {Function} [setter] - Custom setter for setting the object's event
  * listeners.
  */
-export function eventify (target, getter, setter) {
+export function eventify (target, getter, setter, enumerable) {
   target = target || this
   let _events = {}
   if (!getter && !setter) {
@@ -402,6 +406,7 @@ export function eventify (target, getter, setter) {
   }
   Object.defineProperties(target, {
     on: {
+      enumerable: !!enumerable,
       value (type, func, ctx) {
         if (!getter.call(this)) {
           setter.call(this, {})
@@ -415,6 +420,7 @@ export function eventify (target, getter, setter) {
       }
     },
     off: {
+      enumerable: !!enumerable,
       value (type, func) {
         const events = getter.call(this)
         const listeners = events[type]
@@ -433,6 +439,7 @@ export function eventify (target, getter, setter) {
       }
     },
     emit: {
+      enumerable: !!enumerable,
       value (...args) {
         const events = getter.call(this) || {}
         const type = args.shift()
@@ -493,4 +500,51 @@ export function addHiddenPropsToTarget (target, props) {
     }
   })
   Object.defineProperties(target, props)
+}
+
+export function extend (props, classProps) {
+  const Parent = this
+  let Child
+
+  props || (props = {})
+  classProps || (classProps = {})
+
+  if (props.hasOwnProperty('constructor')) {
+    Child = props.constructor
+    delete props.constructor
+  } else {
+    Child = function (...args) {
+      classCallCheck(this, Child)
+      const _this = possibleConstructorReturn(this, (Child.__super__ || Object.getPrototypeOf(Child)).apply(this, args))
+      return _this
+    }
+  }
+
+  Child.prototype = Object.create(Parent && Parent.prototype, {
+    constructor: {
+      value: Child,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  })
+
+  if (Object.setPrototypeOf) {
+    Object.setPrototypeOf(Child, Parent)
+  } else if (classProps.strictEs6Class) {
+    Child.__proto__ = Parent // eslint-disable-line
+  } else {
+    forOwn(Parent, function (value, key) {
+      Child[key] = value
+    })
+  }
+  Object.defineProperty(Child, '__super__', {
+    configurable: true,
+    value: Parent
+  })
+
+  deepMixIn(Child.prototype, props)
+  deepMixIn(Child, classProps)
+
+  return Child
 }

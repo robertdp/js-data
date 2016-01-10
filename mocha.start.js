@@ -4,7 +4,7 @@ require('babel-polyfill');
 var assert = require('chai').assert;
 var sinon = require('sinon')
 var mocha = require('mocha')
-var JSData = require('./dist/js-data-debug')
+var JSData = require('./dist/js-data')
 var JSDataTests = require('./dist/js-data-tests')
 
 var store
@@ -51,21 +51,27 @@ beforeEach(function () {
     name: 'post',
     endpoint: '/posts'
   })
+  this.PostCollection = new JSData.Collection({ model: this.Post })
   this.User = Base.extend({}, {
     name: 'user'
   })
+  this.UserCollection = new JSData.Collection({ model: this.User })
   this.Group = Base.extend({}, {
     name: 'group'
   })
+  this.GroupCollection = new JSData.Collection({ model: this.Group })
   this.Organization = Base.extend({}, {
     name: 'organization'
   })
+  this.OrganizationCollection = new JSData.Collection({ model: this.Organization })
   this.Profile = Base.extend({}, {
     name: 'profile'
   })
+  this.ProfileCollection = new JSData.Collection({ model: this.Profile })
   this.Comment = Base.extend({}, {
     name: 'comment'
   })
+  this.CommentCollection = new JSData.Collection({ model: this.Comment })
   this.User.belongsTo(this.Organization, {
     localField: 'organization',
     localKey: 'organizationId'

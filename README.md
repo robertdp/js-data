@@ -53,96 +53,91 @@ r.js/browserify/webpack build.
 __ES2016:__
 
 ```javascript
-import {Model, registerAdapter} from 'js-data'
+import {Collection, Model, registerAdapter} from 'js-data'
 import DSHttpAdapter from 'js-data-http'
 
-async function showExample() {
-  // "User" will use an http adapter by default
-  @registerAdapter('http', new DSHttpAdapter(), { default: true })
-  class User extends Model {}
+// "User" will use an http adapter by default
+@registerAdapter('http', new DSHttpAdapter(), { default: true })
+class User extends Model {}
+const UserCollection = new Collection({ model: User })
 
-  let user = await User.find(1)
+let user = await UserCollection.find(1)
 
-  console.log(user) // { id: 1, name: 'John' }
-  console.log(user instanceof User) // true
+console.log(user) // { id: 1, name: 'John' }
+console.log(user instanceof User) // true
 
-  // The user instance is now stored in the User Model's collection
-  console.log(User.get(user.id)) // { id: 1, name: 'John' }
-  console.log(user === User.get(user.id)) // true
+// The user instance is now stored in UserCollection
+console.log(UserCollection.get(user.id)) // { id: 1, name: 'John' }
+console.log(user === UserCollection.get(user.id)) // true
 
-  user.name = 'Johnny'
+user.name = 'Johnny'
 
-  // PUT /user/1 {name:"Johnny"}
-  user = await user.save()
+// PUT /user/1 {name:"Johnny"}
+user = await user.save()
 
-  // The user instance has been updated
-  console.log(User.get(user.id)) // { id: 1, name: 'Johnny' }
-  console.log(user === User.get(user.id)) // true
+// The user instance has been updated
+console.log(UserCollection.get(user.id)) // { id: 1, name: 'Johnny' }
+console.log(user === UserCollection.get(user.id)) // true
 
-  await user.destroy()
+await user.destroy()
 
-  // The user instance no longer stored in User
-  console.log(User.get(1)) // undefined
-}
-
-showExample()
+// The user instance no longer stored in UserCollection
+console.log(UserCollection.get(1)) // undefined
 ```
 
 __ES2015:__
 
 ```javascript
-import {Model, registerAdapter} from 'js-data'
+import {Collection, Model, registerAdapter} from 'js-data'
 import DSHttpAdapter from 'js-data-http'
 
-function* showExample() {
-  class User extends Model {}
+class User extends Model {}
+const UserCollection = new Collection({ model: User })
 
-  // "User" will use an http adapter by default
-  User.registerAdapter('http', new DSHttpAdapter(), { default: true })
+// "User" will use an http adapter by default
+User.registerAdapter('http', new DSHttpAdapter(), { default: true })
 
-  let user = yield User.find(1)
+let user = yield UserCollection.find(1)
 
-  console.log(user) // { id: 1, name: 'John' }
-  console.log(user instanceof User) // true
+console.log(user) // { id: 1, name: 'John' }
+console.log(user instanceof User) // true
 
-  // The user instance is now stored in the User Model's collection
-  console.log(User.get(user.id)) // { id: 1, name: 'John' }
-  console.log(user === User.get(user.id)) // true
+// The user instance is now stored in UserCollection
+console.log(UserCollection.get(user.id)) // { id: 1, name: 'John' }
+console.log(user === UserCollection.get(user.id)) // true
 
-  user.name = 'Johnny'
+user.name = 'Johnny'
 
-  // PUT /user/1 {name:"Johnny"}
-  user = yield user.save()
+// PUT /user/1 {name:"Johnny"}
+user = yield user.save()
 
-  // The user instance has been updated
-  console.log(User.get(user.id)) // { id: 1, name: 'Johnny' }
-  console.log(user === User.get(user.id)) // true
+// The user instance has been updated
+console.log(UserCollection.get(user.id)) // { id: 1, name: 'Johnny' }
+console.log(user === UserCollection.get(user.id)) // true
 
-  yield user.destroy()
+yield user.destroy()
 
-  // The user instance no longer stored in User
-  console.log(User.get(1)) // undefined
-}
-
-showExample()
+// The user instance no longer stored in UserCollection
+console.log(UserCollection.get(1)) // undefined
 ```
 
 __ES5:__
 
 ```javascript
 var User = JSData.Model.extend({}, { name: 'User' })
+var UserCollection = new JSData.Collection({ model: User })
 // register and use http by default for async operations
 User.registerAdapter('http', new DSHttpAdapter(), { default: true });
 
 // Example CRUD operations with default configuration
-User.find(1)
+UserCollection.find(1)
   .then(function (user) {
     console.log(user) // { id: 1, name: 'John' }
     console.log(user instanceof User) // true
 
-    // The user instance is now stored in the User Model's collection
-    console.log(User.get(user.id)) // { id: 1, name: 'John' }
-    console.log(user === User.get(user.id)) // true
+    // The user instance is now stored in UserCollection
+    console.log(UserCollection.get(user.id)) // { id: 1, name: 'John' }
+    console.log(user === UserCollection.get(user.id)) // true
 
     user.name = 'Johnny'
 
@@ -151,15 +146,15 @@ User.find(1)
   })
   .then(function (user) {
     // The user instance has been updated
-    console.log(User.get(user.id)) // { id: 1, name: 'Johnny' }
-    console.log(user === User.get(user.id)) // true
+    console.log(UserCollection.get(user.id)) // { id: 1, name: 'Johnny' }
+    console.log(user === UserCollection.get(user.id)) // true
 
     // DELETE /user/1
     return user.destroy()
   })
   .then(function () {
-    // The user instance no longer stored in User
-    console.log(User.get(1)) // undefined
+    // The user instance no longer stored in UserCollection
+    console.log(UserCollection.get(1)) // undefined
   })
 ```
 
@@ -187,7 +182,7 @@ your own. See [Adapters][9].
 
 [![MtnWestJS Conf 2015 Presentation][mtn_b]][mtn_l]
 
-### Dependencies
+## Dependencies
 
 JSData requires the presence of a `Promise` constructor in the global
 environment. In the browser, `window.Promise` must be available. In Node.js,
@@ -197,7 +192,7 @@ https://github.com/jakearchibald/es6-promise.
 JSData also requires full ES5 support from the runtime. Here is a handy library
 for polyfilling: https://github.com/afarkas/html5shiv
 
-### Documentation
+## Documentation
 - [Getting Started with js-data](http://www.js-data.io/docs/home)
 - [Resources/Models](http://www.js-data.io/docs/resources)
 - [Working with the Data Store](http://www.js-data.io/docs/working-with-the-data-store)
@@ -215,7 +210,7 @@ for polyfilling: https://github.com/afarkas/html5shiv
 See an issue with the documentation? Have something to add? Click the "Suggest
 Edits" at the top right of each page and make your suggested changes!
 
-### API Reference
+## API Reference
 - [DS](http://www.js-data.io/docs/ds)
 - [Configuration Options](http://www.js-data.io/docs/dsdefaults)
 - [DSFirebaseAdapter](http://www.js-data.io/docs/dsfirebaseadapter)
@@ -230,21 +225,21 @@ Edits" at the top right of each page and make your suggested changes!
 - [DSSqlAdapter](http://www.js-data.io/docs/dssqladapter)
 - [js-data-schema](http://www.js-data.io/docs/js-data-schema)
 
-### Support
+## Support
 
-Support questions are handled via [StackOverflow][so], [Slack][slack], and the
+Support questions are handled via [Stack Overflow][so], [Slack][slack], and the
 [Mailing List][ml]. Ask your questions there.
 
-### Community
-- [StackOverflow Channel][so]
-- [Slack Chat][slack] [![Slack Status][sl_b]][slack]
+## Community
+- [StackOverflow][so]
+- [Slack chat][slack] [![Slack Status][sl_b]][slack]
 - [Announcements](http://www.js-data.io/blog)
 - [Mailing List](ml)
-- [Issues Tracker](https://github.com/js-data/js-data/issues)
+- [Issue Tracker](https://github.com/js-data/js-data/issues)
 - [GitHub](https://github.com/js-data/js-data)
 - [Contributing Guide](https://github.com/js-data/js-data/blob/master/CONTRIBUTING.md)
 
-### Contributing
+## Contributing
 
 When submitting bug reports or feature requests on GitHub, please include _as
 much detail as possible_.
@@ -271,7 +266,7 @@ will be committed when a release is cut.
 1. Submit your PR and we'll review!
 1. Thanks!
 
-### License
+## License
 
 The MIT License (MIT)
 
